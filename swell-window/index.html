@@ -1,9 +1,30 @@
 <!doctype html>
+<!--
+  Swell Window Explorer — part of the First Order series at Science of Surfing.
+  Copyright (C) 2026 Kevin Okun. Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+  Source + license: https://github.com/kevin-okun/SoS-tools · https://www.gnu.org/licenses/agpl-3.0.html
+  You may study, share, and build on this code under the AGPL, which means keeping this notice and
+  publishing your source if you host a modified version. The "Science of Surfing" name and logo,
+  and all article text and figures, are © Kevin Okun and are NOT covered by that license.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Which swell directions reach your break?</title>
+<title>Which swell directions reach your break? · Science of Surfing</title>
+<meta name="description" content="Which swell directions can actually reach your break? An interactive map of ten Southern California breaks over their real seafloor, from Science of Surfing.">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Science of Surfing">
+<meta property="og:title" content="Which swell directions reach your break?">
+<meta property="og:description" content="An interactive map of the Southern California Bight: which swell directions actually reach ten surf breaks, traced over the real seafloor.">
+<meta property="og:url" content="https://tools.scienceofsurfing.com/swell-window/">
+<meta property="og:image" content="https://tools.scienceofsurfing.com/swell-window/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Which swell directions reach your break?">
+<meta name="twitter:description" content="An interactive map of the Southern California Bight: which swell directions actually reach ten surf breaks, traced over the real seafloor.">
+<meta name="twitter:image" content="https://tools.scienceofsurfing.com/swell-window/og-image.png">
 <style>
   :root{
     --open:#12925a; --coast:#9a958c; --ink:#151310; --muted:#6d675d; --card:#ffffff;
@@ -96,6 +117,10 @@
 
   footer{margin-top:20px;font-size:11.5px;color:var(--muted);line-height:1.7;}
   footer b{color:var(--ink);} footer a{color:var(--accent);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+  footer p{margin:0 0 9px;}
+  footer .credits{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);font-size:11px;}
+  footer .copyline{font-size:10.5px;color:#8a857b;margin-bottom:0;}
 </style>
 </head>
 <body>
@@ -724,9 +749,15 @@ if (typeof module !== "undefined" && module.exports) {
   function tick(){ phase=(phase+0.4)%spacing; gWave.setAttribute('transform','translate('+(pu.x*phase).toFixed(2)+','+(pu.y*phase).toFixed(2)+')'); requestAnimationFrame(tick); }
 
   document.getElementById('foot').innerHTML=
-    'The <b>swell window</b> is the straight-line answer: the arc of open ocean a break can see, and the islands and headlands that block the rest. '+
+    '<p class="footnote">The <b>swell window</b> is the straight-line answer: the arc of open ocean a break can see, and the islands and headlands that block the rest. '+
     'Turn on <b>Refraction</b> to see every path a swell can take to reach the selected break, traced through the real seafloor. Longer-period swells feel the bottom sooner and bend more, so try 6 s against 18 s. '+
-    'The seafloor is real (GMRT bathymetry); the rays show how waves turn, not how big they get.';
+    'The rays show how waves turn, not how big they get.</p>'+
+    '<p class="credits"><b>Data &amp; method.</b> Seafloor: <a href="https://www.gmrt.org" target="_blank" rel="noopener">GMRT</a> global bathymetry (Ryan et al. 2009). '+
+    'Island blocking follows the Southern California Bight wave model of <a href="https://doi.org/10.1016/0378-3839(93)90032-4" target="_blank" rel="noopener">O&rsquo;Reilly &amp; Guza (1993)</a>, run operationally by <a href="https://cdip.ucsd.edu" target="_blank" rel="noopener">CDIP</a>. '+
+    'Diffraction after <a href="https://royalsocietypublishing.org/doi/10.1098/rsta.1952.0003" target="_blank" rel="noopener">Penney &amp; Price (1952)</a>.</p>'+
+    '<p class="copyline">&copy; 2026 <a href="https://scienceofsurfing.com" target="_blank" rel="noopener">Kevin Okun &middot; Science of Surfing</a>. '+
+    'Code licensed <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener">AGPL-3.0</a> (<a href="https://github.com/kevin-okun/SoS-tools" target="_blank" rel="noopener">source</a>). '+
+    'The Science of Surfing name, logo, and article content are not covered by that license.</p>';
 
   render(); requestAnimationFrame(tick);
 })();
