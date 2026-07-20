@@ -1,55 +1,30 @@
-# Science of Surfing — interactive tools
+# Science of Surfing — Tools
 
-Static site for the **First Order** series. One folder per tool.
-Currently: `swell-window/` (the Swell Window Explorer).
+Interactive tools for the **First Order** series at [Science of Surfing](https://scienceofsurfing.com).
+Each tool takes one question surfers argue about and answers it in layers you can see and drag.
 
-Live target: **https://tools.scienceofsurfing.com/**
-The explorer: **https://tools.scienceofsurfing.com/swell-window/**
+Live: **https://tools.scienceofsurfing.com/**
 
-------------------------------------------------------------------
-## Deploy on GitHub Pages (free, versioned)
+## Tools
 
-### 1. Make the repo
-- New GitHub repo, e.g. `sos-tools`. **Public** is simplest
-  (private repos need GitHub Pro for Pages).
-- Upload everything in this folder to the repo root, keeping the
-  structure: `index.html`, `CNAME`, and `swell-window/index.html`.
-  (Web UI works: "Add file → Upload files", drag them in, commit.)
+| Tool | What it answers | Live |
+|------|-----------------|------|
+| [Swell Window Explorer](swell-window/) | Which swell directions can actually reach a break, for ten Southern California spots | [open](https://tools.scienceofsurfing.com/swell-window/) |
 
-### 2. Turn on Pages
-- Repo → **Settings → Pages**.
-- Source: **Deploy from a branch**, branch **main**, folder **/ (root)**. Save.
-- It builds in a minute. The `CNAME` file already tells Pages the
-  custom domain is `tools.scienceofsurfing.com`.
+Each tool lives in its own folder with a `README.md` describing it and its data sources.
 
-### 3. Point the subdomain (Porkbun)
-- Porkbun → scienceofsurfing.com → **DNS Records**.
-- Add one record:
-  - **Type:** CNAME
-  - **Host:** `tools`
-  - **Answer:** `<your-github-username>.github.io`   (no https://, no trailing slash)
-- Leave every other record alone. `www` and the apex (your Substack) are untouched.
+## How it is served
 
-### 4. Lock in HTTPS
-- Back in Settings → Pages, the custom domain should show
-  `tools.scienceofsurfing.com`. Wait for the DNS check to pass
-  (minutes to an hour), then tick **Enforce HTTPS**.
+A plain static site on GitHub Pages, custom domain `tools.scienceofsurfing.com` (`CNAME`),
+Jekyll disabled (`.nojekyll`). No build step: every tool is a single self-contained `index.html`.
 
-Done. The explorer is live at
-`https://tools.scienceofsurfing.com/swell-window/`.
+## License and credits
 
-------------------------------------------------------------------
-## Updating the tool later
-Replace `swell-window/index.html` in the repo (drag-drop in the web
-UI or `git push`) and commit. Pages redeploys on its own.
-Every version is in the repo history, so a bad change is one revert away.
+- **Code** is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
+  You may study, share, and build on it, provided you keep the notices and publish your source
+  if you host a modified version.
+- The **"Science of Surfing" name and logo**, and all **article text and figures**, are
+  © Kevin Okun and are **not** covered by that license.
+- **Data and scientific sources** are credited in each tool's own README and on the tool page.
 
-## Adding the next tool
-New folder (e.g. `refraction/`), drop its `index.html` in, add one line
-to the landing page (`index.html`) linking it. Same subdomain, same repo.
-
-------------------------------------------------------------------
-## Files
-- `index.html` — branded landing page listing the tools
-- `swell-window/index.html` — the Swell Window Explorer (self-contained)
-- `CNAME` — custom domain for GitHub Pages (`tools.scienceofsurfing.com`)
+To add a tool, see [CONTRIBUTING.md](CONTRIBUTING.md).
