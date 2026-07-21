@@ -762,5 +762,22 @@ if (typeof module !== "undefined" && module.exports) {
   render(); requestAnimationFrame(tick);
 })();
 </script>
+<script>
+/* Embed auto-resize: when loaded inside an iframe, report content height to the host
+   page so the iframe can size itself to fit. No effect when used standalone. */
+(function(){
+  if (window.parent === window) return;
+  var last = 0;
+  function post(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    if (Math.abs(h - last) < 2) return; last = h;
+    parent.postMessage({ 'sos-embed': { tool: 'swell-window', height: h } }, '*');
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+  setTimeout(post,200); setTimeout(post,900); setTimeout(post,2500);
+})();
+</script>
 </body>
 </html>

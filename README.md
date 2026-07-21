@@ -10,6 +10,7 @@ Live: **https://tools.scienceofsurfing.com/**
 | Tool | What it answers | Live |
 |------|-----------------|------|
 | [Swell Window Explorer](swell-window/) | Which swell directions can actually reach a break, for ten Southern California spots | [open](https://tools.scienceofsurfing.com/swell-window/) |
+| [Swell Window Explorer — NY/NJ](swell-window-ny/) | Same, for seven New York and New Jersey breaks from Manasquan to Montauk | [open](https://tools.scienceofsurfing.com/swell-window-ny/) |
 
 Each tool lives in its own folder with a `README.md` describing it and its data sources.
 
