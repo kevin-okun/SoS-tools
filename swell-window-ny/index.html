@@ -495,7 +495,14 @@ if (typeof module!=="undefined" && module.exports) {
 
     var rr=null, ro=null;
     if(refract){ rr=drawRefract();
-      ro=null;   // rose stays first-order (sand-origin sight lines); refraction mode is about paths
+      // Refracted window: the offshore deep-water bearings a swell of this period reaches the break from,
+      // i.e. the directions you'd read off an offshore buoy. Paint +/-3 deg around each connecting ray to
+      // bridge fan-sampling gaps; genuine shadow gaps (far wider) stay grey.
+      var rocc=new Array(360); for(var ri=0;ri<360;ri++) rocc[ri]=false;
+      usableRays().forEach(function(r){ var b=((Math.round(r.d)%360)+360)%360;
+        for(var k=-3;k<=3;k++) rocc[((b+k)%360+360)%360]=true; });
+      var nOpen=0; for(var rj=0;rj<360;rj++) if(rocc[rj]) nOpen++;
+      ro={occ:rocc, n:nOpen, period:state.period};
     } else { while(gRefract.firstChild) gRefract.removeChild(gRefract.firstChild); }
     rebuildWaves();
     g.removeChild(gSpot); g.appendChild(gSpot);
@@ -514,8 +521,9 @@ if (typeof module!=="undefined" && module.exports) {
     document.getElementById('roseWrap').innerHTML=rose(pc,ro); attachRose();
     var w=windowSummary(pc.occ), arcs=[], seen={};
     w.runs.forEach(function(r){ if(r[1]-r[0]>=6){ var n=arcName(r); if(!seen[n]){seen[n]=1;arcs.push(n);} } });
-    if(refract&&rr){ document.getElementById('summary').innerHTML='<span class="big">'+rr.n+' traced paths reach '+state.sel.replace(' / Scripps','')+' at '+state.period+' s.</span> '+
-      'The rose shows the straight-line window ('+w.openDeg+'&#176;); the paths on the map show where refraction bends the rest.'; }
+    if(refract&&rr){ var bnR=state.sel.replace(' / Scripps','');
+      document.getElementById('summary').innerHTML='<span class="big">'+ro.n+'&#176; of swell directions reach '+bnR+' at '+state.period+' s.</span> '+
+      'The rose&rsquo;s outer ring is this refracted window (the offshore, buoy-reading directions the swell reaches the break from); the faint inner ring is the straight-line window ('+w.openDeg+'&#176;) for comparison. The '+rr.n+' white paths trace the routes in.'; }
     else { document.getElementById('summary').innerHTML='<span class="big">'+w.openDeg+'&#176; of the compass is open.</span> '+
       'Straight-line swell reaches '+state.sel.replace(' / Scripps','')+' from <b>'+(arcs.length?arcs.slice(0,4).join(', '):'a few narrow slots')+'</b>.'; }
     var blk=w.blockers, keys=Object.keys(blk).filter(function(k){return blk[k]>=6;}).sort(function(a,b){return blk[b]-blk[a];});
