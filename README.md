@@ -11,6 +11,7 @@ Live: **https://tools.scienceofsurfing.com/**
 |------|-----------------|------|
 | [Swell Window Explorer](swell-window/) | Which swell directions can actually reach a break, for ten Southern California spots | [open](https://tools.scienceofsurfing.com/swell-window/) |
 | [Swell Window Explorer — NY/NJ](swell-window-ny/) | Same, for seven New York and New Jersey breaks from Manasquan to Montauk | [open](https://tools.scienceofsurfing.com/swell-window-ny/) |
+| [Breaking Wave](breaking-wave/) | What makes a wave spill, plunge, or surge — one wave from deep water to the sand, side-on | [open](https://tools.scienceofsurfing.com/breaking-wave/) |
 
 Each tool lives in its own folder with a `README.md` describing it and its data sources.
 

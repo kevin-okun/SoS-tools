@@ -27,6 +27,12 @@ For the Southern California tool, use the same block with
 `src=".../swell-window/"` and `id="sos-swell-window"`. One `<script>` handles any
 number of embedded tools on the page.
 
+## Breaking Wave
+
+Same pattern, with `src=".../breaking-wave/"`, `id="sos-breaking-wave"`,
+`title="Breaking Wave — spill, plunge, or surge"`, and a starting height of
+`1050px` (the resize script takes over from there).
+
 ## Notes
 
 - The iframe loads the hosted tool, so the Science of Surfing branding, footer credits,
