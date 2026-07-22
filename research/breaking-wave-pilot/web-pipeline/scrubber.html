@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- Prototype scrubber for REAL simulated free-surface frames (not part of the site yet).
+     Drop a frames JSON next to this file as frames.json, or drag one onto the page. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real breaking wave — data scrubber prototype</title>
+<style>
+  body{margin:0;background:#f4f2ec;color:#151310;font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 16px;}
+  h1{font-size:20px;margin:0 0 4px;} .sub{color:#6d675d;font-size:13px;margin:0 0 14px;}
+  .card{background:#fff;border:1px solid #e6e2da;border-radius:12px;padding:12px;}
+  canvas{display:block;width:100%;border-radius:8px;background:#fdfdfc;}
+  .row{display:flex;align-items:center;gap:12px;margin-top:10px;}
+  input[type=range]{flex:1;accent-color:#151310;}
+  button{font-size:13px;border:1px solid #e6e2da;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;}
+  button:hover{border-color:#151310;}
+  .t{font-variant-numeric:tabular-nums;font-weight:700;min-width:90px;text-align:right;}
+  .meta{color:#6d675d;font-size:12px;margin-top:10px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Real breaking wave — scrubber prototype</h1>
+  <p class="sub">Every line below is the actual simulated air–water interface, frame by frame. No drawing, no schematic.</p>
+  <div class="card">
+    <canvas id="cv" height="440"></canvas>
+    <div class="row">
+      <button id="play">▶</button>
+      <input id="scrub" type="range" min="0" max="0" value="0" step="1">
+      <span class="t" id="tlab">—</span>
+    </div>
+    <div class="meta" id="meta">Loading frames.json…</div>
+  </div>
+</div>
+<script>
+(function(){
+  var DATA = null, fi = 0, playing = false, last = 0;
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var scrub = document.getElementById('scrub'), tlab = document.getElementById('tlab');
+
+  function bounds(){
+    var xs = [], ys = [];
+    DATA.frames.forEach(function(fr){ fr.lines.forEach(function(l){ l.forEach(function(p){ xs.push(p[0]); ys.push(p[1]); }); }); });
+    var mx = Math.min.apply(0, xs), Mx = Math.max.apply(0, xs);
+    var my = Math.min.apply(0, ys), My = Math.max.apply(0, ys);
+    var padY = 0.15*(My-my);
+    return {mx:mx, Mx:Mx, my:my-padY, My:My+padY};
+  }
+  var B = null;
+  function layout(){
+    var dpr = window.devicePixelRatio||1, w = cv.clientWidth||960, h = 440;
+    cv.width = w*dpr; cv.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {w:w, h:h};
+  }
+  function draw(){
+    if (!DATA) return;
+    var V = layout(), fr = DATA.frames[fi];
+    var sx = V.w/(B.Mx-B.mx), sy = V.h/(B.My-B.my), s = Math.min(sx, sy);
+    var ox = (V.w - s*(B.Mx-B.mx))/2, oy = (V.h + s*(B.My-B.my))/2;
+    function X(x){ return ox + (x-B.mx)*s; }
+    function Y(y){ return oy - (y-B.my)*s; }
+    ctx.clearRect(0,0,V.w,V.h);
+    ctx.strokeStyle = 'rgba(21,19,16,.15)'; ctx.setLineDash([4,4]); ctx.beginPath();
+    ctx.moveTo(X(B.mx), Y(0)); ctx.lineTo(X(B.Mx), Y(0)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth = 2; ctx.strokeStyle = '#22506a';
+    fr.lines.forEach(function(l){
+      ctx.beginPath();
+      ctx.moveTo(X(l[0][0]), Y(l[0][1]));
+      for (var i = 1; i < l.length; i++) ctx.lineTo(X(l[i][0]), Y(l[i][1]));
+      ctx.stroke();
+    });
+    tlab.textContent = 't = '+fr.t.toFixed(3)+' T';
+    scrub.value = fi;
+  }
+  function step(ms){
+    if (playing){
+      if (ms-last > 50){ fi = (fi+1)%DATA.frames.length; last = ms; draw(); }
+      requestAnimationFrame(step);
+    }
+  }
+  document.getElementById('play').addEventListener('click', function(){
+    playing = !playing; this.textContent = playing ? '❚❚' : '▶';
+    if (playing) requestAnimationFrame(step);
+  });
+  scrub.addEventListener('input', function(){ fi = +this.value; draw(); });
+  function load(d){
+    DATA = d; B = bounds(); fi = 0;
+    scrub.max = d.frames.length-1;
+    document.getElementById('meta').textContent =
+      (d.solver||'') + ' · ' + d.frames.length + ' frames · ' +
+      (d.wave ? JSON.stringify(d.wave) : '');
+    draw();
+  }
+  fetch('frames.json').then(function(r){ return r.json(); }).then(load)
+    .catch(function(){ document.getElementById('meta').textContent = 'frames.json not found — drag a JSON file onto the page.'; });
+  window.addEventListener('dragover', function(e){ e.preventDefault(); });
+  window.addEventListener('drop', function(e){
+    e.preventDefault();
+    var f = e.dataTransfer.files[0], r = new FileReader();
+    r.onload = function(){ load(JSON.parse(r.result)); };
+    r.readAsText(f);
+  });
+  window.addEventListener('resize', draw);
+})();
+</script>
+</body>
+</html>
