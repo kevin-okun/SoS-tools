@@ -130,7 +130,9 @@ def run_case(ctx, browser_cdp, base_url, case_dir, bathy_path, out_dir,
         page.set_input_files("#bathymetryFile", bathy_path)
         page.set_input_files("#waveFile", os.path.join(case_dir, "waves.txt"))
         page.wait_for_timeout(1000)
-        page.click("#start-simulation-btn")
+        # index_headless.html keeps its input panel display:none; dispatch the
+        # click directly instead of via actionability-checked page.click()
+        page.evaluate("document.getElementById('start-simulation-btn').click()")
         log(f"case {result['case']}: started (grid {width}x{height}, "
             f"to t={t_end:.0f} s)")
         ok = wait_for_completion(out_dir, t_end, timeout_min * 60, log)
