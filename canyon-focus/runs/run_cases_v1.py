@@ -72,13 +72,38 @@ def find_chromium():
 
 def chrome_flags():
     flags = ["--headless=new", "--enable-unsafe-webgpu",
-             "--enable-features=WebGPU"]
+             "--enable-features=WebGPU",
+             "--no-first-run", "--no-default-browser-check",
+             "--disable-session-crashed-bubble"]
     if platform.system() == "Linux":
         flags += ["--no-sandbox", "--disable-gpu-sandbox"]
     # CPU fallback ONLY on explicit request (e.g. GPU-less containers):
     if os.environ.get("CELERIS_SWIFTSHADER") == "1":
         flags.append("--use-webgpu-adapter=swiftshader")
     return flags
+
+
+def wait_for_cdp(chrome, cdp_port, chrome_log, timeout_s=40):
+    import urllib.request
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        if chrome.poll() is not None:
+            break
+        try:
+            urllib.request.urlopen(
+                f"http://127.0.0.1:{cdp_port}/json/version", timeout=2)
+            return
+        except OSError:
+            time.sleep(1)
+    tail = ""
+    try:
+        with open(chrome_log, errors="replace") as fh:
+            tail = fh.read()[-2000:]
+    except OSError:
+        pass
+    sys.exit(f"Browser did not expose CDP on port {cdp_port} within "
+             f"{timeout_s}s (exit code: {chrome.poll()}).\n"
+             f"Browser log ({chrome_log}):\n{tail}")
 
 
 def free_port():
@@ -223,12 +248,14 @@ def main():
                             stderr=subprocess.DEVNULL)
     flags = [f for f in chrome_flags()
              if not (args.headful and "headless" in f)]
-    chrome = subprocess.Popen([chromium, *flags,
-                               f"--remote-debugging-port={cdp_port}",
-                               f"--user-data-dir={profile}"],
-                              stdout=subprocess.DEVNULL,
-                              stderr=subprocess.DEVNULL)
-    time.sleep(5)
+    chrome_log = os.path.join(tempfile.gettempdir(), "celeris_chrome.log")
+    print(f"browser: {chromium}\nbrowser log: {chrome_log}")
+    with open(chrome_log, "w") as logfh:
+        chrome = subprocess.Popen([chromium, *flags,
+                                   f"--remote-debugging-port={cdp_port}",
+                                   f"--user-data-dir={profile}"],
+                                  stdout=logfh, stderr=logfh)
+    wait_for_cdp(chrome, cdp_port, chrome_log)
 
     def log(msg):
         print(f"{time.strftime('%H:%M:%S')} {msg}", flush=True)
