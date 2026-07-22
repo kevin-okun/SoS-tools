@@ -181,6 +181,9 @@ def run_case(ctx, browser_cdp, base_url, case_dir, bathy_path, out_dir,
     page.on("console", lambda m: console_log.append(f"[{m.type}] {m.text}")
             if m.type in ("error", "warning") else None)
     page.on("pageerror", lambda e: console_log.append(f"[pageerror] {e}"))
+    # a modal dialog blocks page JS and stalls uploads; never leave one open
+    page.on("dialog", lambda d: d.dismiss())
+    UPLOAD_TIMEOUT = 300000  # ms; bathy.txt is ~29 MB
     result = {"case": os.path.basename(case_dir), "ok": False,
               "t_end": t_end, "started": time.strftime("%F %T")}
     try:
@@ -190,9 +193,12 @@ def run_case(ctx, browser_cdp, base_url, case_dir, bathy_path, out_dir,
         page.goto(base_url + "/index.html", timeout=60000)
         page.wait_for_timeout(3000)
         page.set_input_files("#configFile",
-                             os.path.join(case_dir, "config.json"))
-        page.set_input_files("#bathymetryFile", bathy_path)
-        page.set_input_files("#waveFile", os.path.join(case_dir, "waves.txt"))
+                             os.path.join(case_dir, "config.json"),
+                             timeout=UPLOAD_TIMEOUT)
+        page.set_input_files("#bathymetryFile", bathy_path,
+                             timeout=UPLOAD_TIMEOUT)
+        page.set_input_files("#waveFile", os.path.join(case_dir, "waves.txt"),
+                             timeout=UPLOAD_TIMEOUT)
         page.wait_for_timeout(1000)
         # index_headless.html keeps its input panel display:none; dispatch the
         # click directly instead of via actionability-checked page.click()
@@ -207,6 +213,11 @@ def run_case(ctx, browser_cdp, base_url, case_dir, bathy_path, out_dir,
     except Exception as exc:
         log(f"case {result['case']}: EXCEPTION {exc}")
         result["error"] = str(exc)
+        try:
+            page.screenshot(path=os.path.join(out_dir, "error_screenshot.png"))
+            log(f"  screenshot -> {out_dir}/error_screenshot.png")
+        except Exception:
+            pass
     finally:
         page.close()
         result["finished"] = time.strftime("%F %T")
