@@ -1,0 +1,13 @@
+{
+  "case_id": "T16_D280_real_mono",
+  "period": 16.0,
+  "direction_from": 280.0,
+  "layer": "real",
+  "forcing": "mono",
+  "hs_offshore": 1.0,
+  "n_components": 1,
+  "t_resetMeans": 848.6,
+  "t_resetWH": 968.6,
+  "t_write": 1768.6,
+  "bathy_file": "grids/bathy_real_v4.txt"
+}

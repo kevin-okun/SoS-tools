@@ -26,23 +26,59 @@ import argparse
 import glob
 import json
 import os
+import platform
 import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 
 from playwright.sync_api import sync_playwright
 
-CHROMIUM = os.environ.get("CELERIS_CHROMIUM", "/opt/pw-browsers/chromium")
 KEEP_FILES = {"dx.txt", "dy.txt", "nx.txt", "ny.txt",
               "current_bathytopo.bin", "current_Hs.bin",
               "current_Hrms.bin", "current_FSmean.bin", "completed.txt"}
-CHROME_FLAGS = ["--headless=new", "--no-sandbox", "--disable-gpu-sandbox",
-                "--enable-unsafe-webgpu", "--enable-features=WebGPU"]
-# On machines without a hardware GPU, force the SwiftShader CPU fallback:
-if os.environ.get("CELERIS_SWIFTSHADER", "auto") != "0" and not os.path.exists("/dev/dri"):
-    CHROME_FLAGS.append("--use-webgpu-adapter=swiftshader")
+
+CHROME_CANDIDATES = {
+    "Windows": [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    ],
+    "Darwin": [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    ],
+    "Linux": [
+        "/usr/bin/google-chrome", "/usr/bin/chromium",
+        "/usr/bin/chromium-browser", "/opt/pw-browsers/chromium",
+    ],
+}
+
+
+def find_chromium():
+    env = os.environ.get("CELERIS_CHROMIUM")
+    if env:
+        if os.path.exists(env):
+            return env
+        sys.exit(f"CELERIS_CHROMIUM={env} does not exist")
+    for path in CHROME_CANDIDATES.get(platform.system(), []):
+        if os.path.exists(path):
+            return path
+    sys.exit("No Chrome/Chromium found. Install Google Chrome (113+) or set "
+             "CELERIS_CHROMIUM to the browser executable path.")
+
+
+def chrome_flags():
+    flags = ["--headless=new", "--enable-unsafe-webgpu",
+             "--enable-features=WebGPU"]
+    if platform.system() == "Linux":
+        flags += ["--no-sandbox", "--disable-gpu-sandbox"]
+    # CPU fallback ONLY on explicit request (e.g. GPU-less containers):
+    if os.environ.get("CELERIS_SWIFTSHADER") == "1":
+        flags.append("--use-webgpu-adapter=swiftshader")
+    return flags
 
 
 def free_port():
@@ -178,14 +214,16 @@ def main():
     ap.add_argument("--keep-all", action="store_true")
     args = ap.parse_args()
 
+    chromium = find_chromium()
     http_port, cdp_port = free_port(), free_port()
-    profile = os.path.join("/tmp", f"celeris-profile-{cdp_port}")
+    profile = tempfile.mkdtemp(prefix="celeris-profile-")
     http = subprocess.Popen([sys.executable, "-m", "http.server",
                              str(http_port)], cwd=args.celeris,
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
-    flags = [f for f in CHROME_FLAGS if not (args.headful and "headless" in f)]
-    chrome = subprocess.Popen([CHROMIUM, *flags,
+    flags = [f for f in chrome_flags()
+             if not (args.headful and "headless" in f)]
+    chrome = subprocess.Popen([chromium, *flags,
                                f"--remote-debugging-port={cdp_port}",
                                f"--user-data-dir={profile}"],
                               stdout=subprocess.DEVNULL,
