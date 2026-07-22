@@ -123,7 +123,10 @@ def run_case(ctx, browser_cdp, base_url, case_dir, bathy_path, out_dir,
     result = {"case": os.path.basename(case_dir), "ok": False,
               "t_end": t_end, "started": time.strftime("%F %T")}
     try:
-        page.goto(base_url + "/index_headless.html", timeout=60000)
+        # Drive the full index.html: the stock Selenium harness targets the
+        # live full page, and index_headless.html's init dies on a missing
+        # refresh-button element (main.js binds it without a null guard).
+        page.goto(base_url + "/index.html", timeout=60000)
         page.wait_for_timeout(3000)
         page.set_input_files("#configFile",
                              os.path.join(case_dir, "config.json"))

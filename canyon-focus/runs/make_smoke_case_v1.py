@@ -69,6 +69,7 @@ def main():
         "south_boundary_type": 1, "north_boundary_type": 1,
         "BoundaryWidth": 12,
         "incident_wave_type": -1,
+        "GoogleMapOverlay": 0,
         "amplitude": HS / 2.0, "period": T, "direction": 0,
         # automation triggers (same keys the stock Selenium harness injects)
         "trigger_animation": 0,
