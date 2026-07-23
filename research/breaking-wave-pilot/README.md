@@ -32,6 +32,13 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   closes a pocket. Cost: 80 min for 16 s on 4 ranks (vs 8 min coarse).
 - **Multi-breaker clip**: with the absorbing outlet and endTime 30 s (coarse mesh,
   37 min) the flume delivers four breaking events at t ≈ 14.1, 18.9, 23.5, 29.3 s.
+- **Flagship run** (`web-pipeline/frames-plunging.json`): refined surf zone +
+  absorbing outlet, reached t = 27.6 s of 30 in ~3.5 h on 4 ranks before being
+  stopped at the overnight deadline — **three breaking events, all overturning**.
+  Peak structure at t = 19.65 s (the second, largest breaker): 9 stacked surface
+  layers and 38 sealed air pockets. After the first breaker the surf zone stays
+  aerated for the rest of the run, so the timestep never fully recovers — budget
+  ~5 h for a full 30 s at this resolution, or refine a narrower band.
 - **Web payload**: `decimate_frames.py` (Douglas–Peucker + fragment culling +
   mm rounding) takes a 30 s clip from 8.5 MB to 0.6 MB raw, **~100 KB gzipped**, with
   no visible change to the profile (1009 → 131 points on a breaking frame).
@@ -53,8 +60,15 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   keeps multivalued loops/bubbles), `extract_isolines.py` (same idea for OpenFOAM cases
   via PyVista contouring, works on decomposed cases), `scrubber.html` (prototype player;
   serve the folder and open, or drag a frames JSON onto it — auto vertical exaggeration,
-  factor shown in the time label), `frames.json` (Basilisk deep-water run),
-  `frames-shoaling.json` (OpenFOAM flume run, 320 frames × 0.05 s).
+  factor shown in the time label), `decimate_frames.py` (web-sizing pass — run this
+  before shipping a clip), `frames.json` (Basilisk deep-water run),
+  `frames-shoaling.json` (coarse flume, 16 s, 320 frames),
+  `frames-plunging.json` (**the good one**: refined + absorbing outlet, 27.6 s,
+  552 frames, decimated to 1.4 MB / 352 KB gzipped).
+- `figures/` — overnight campaign figures: `fig0` first plunging jet at true aspect
+  ratio, `fig1` coarse-vs-refined breaking sequence, `fig2` strongest-overhang frames,
+  `fig3` multi-breaker timeline, `fig4` surface-noise comparison, `fig5` decimation
+  before/after.
 
 ## Known issues found during the pilot
 
