@@ -24,9 +24,17 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   plunging jet. 320 interface frames at even 0.05 s spacing →
   `web-pipeline/frames-shoaling.json` (4.4 MB raw, ~14 KB/frame). Pre-wave surface
   noise ≤ ~0.7 mm rms (was ~4 mm before the two fixes below).
-- **Timing note**: with the 5 s ramp and 22 m of propagation, endTime 16 s captures
-  exactly one breaking event, ending just as the bore reaches the end wall. For a
-  multi-breaker loopable clip, set endTime ≈ 26–30 s (~2× the compute).
+- **Refined surf zone DOES capture overturning** (the headline result). Two
+  `refineMesh` passes over x > 6.5 m (0.5 cm × 0.22 cm cells, 158k cells total) turn
+  the spilling crumble into a genuine plunging breaker: the lip curls forward at
+  t ≈ 14.85 s and **seals an air pocket ≈ 15 × 5 cm** at t ≈ 14.95 s (x ≈ 9.8 m),
+  collapsing into splash-up and bubble entrainment by 15.05 s. The coarse mesh never
+  closes a pocket. Cost: 80 min for 16 s on 4 ranks (vs 8 min coarse).
+- **Multi-breaker clip**: with the absorbing outlet and endTime 30 s (coarse mesh,
+  37 min) the flume delivers four breaking events at t ≈ 14.1, 18.9, 23.5, 29.3 s.
+- **Web payload**: `decimate_frames.py` (Douglas–Peucker + fragment culling +
+  mm rounding) takes a 30 s clip from 8.5 MB to 0.6 MB raw, **~100 KB gzipped**, with
+  no visible change to the profile (1009 → 131 points on a breaking frame).
 
 ## What's in here
 
@@ -79,8 +87,18 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   fatal errors (serial runs die properly with SIGFPE).
 - The wet/dry shoreline needs care in interFoam: keep ≥ ~6 cells of water depth at the
   domain end or handle the contact line properly (the committed case truncates at 12 m).
-  The end wall reflects — fine for one breaker in 16 s; for longer runs consider a
-  `shallowWaterAbsorption` outlet like the tutorial's.
+- **End-wall reflection turned out NOT to matter** (tested, contrary to expectation):
+  swapping `endWall` for a `shallowWaterAbsorption` outlet leaves the wave-height
+  envelope essentially unchanged (6% spatial variation either way, no node/antinode
+  pattern) — because breaking dissipates the wave before it reaches the wall. The
+  absorbing outlet is still the better setup for long runs, just not a prerequisite.
+  Note the naive test — surface rms in the "deep" section — is useless here: that
+  window contains the incident wave itself. Use the standing-wave envelope instead.
+- **Measuring overturning**: count how many distinct surface heights stack up over a
+  1 cm x-bin (1 = single-valued; ≥2 = overturning) plus closed-polyline detection for
+  air pockets. Do *not* measure "how far the surface doubles back in x" — the
+  extractor's chained polylines are not ordered monotonically in x, so that metric
+  reports the whole domain span for every frame, including flat ones.
 
 ## Reproducing / continuing
 
