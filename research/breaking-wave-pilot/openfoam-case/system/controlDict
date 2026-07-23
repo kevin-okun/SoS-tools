@@ -25,3 +25,6 @@ maxCo           0.45;
 maxAlphaCo      0.45;
 maxDeltaT       0.005;
 
+
+// so utilities (setAlphaField) can parse the wave BCs in 0/
+libs            (waveModels);

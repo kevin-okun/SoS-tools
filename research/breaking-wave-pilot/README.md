@@ -17,12 +17,13 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   before gzip/decimation. Well within static-site budget per clip.
 - **OpenFOAM interFoam shoaling breaker** (`openfoam-case/`, run in the
   `opencfd/openfoam-default:2412` Docker image): the full 16 s of the Ting &
-  Kirby-style flume (54k cells, laminar, 4 MPI ranks) in **36 min wall-clock on a
+  Kirby-style flume (54k cells, laminar, 4 MPI ranks) in **8.1 min wall-clock on a
   laptop i9-9980HK** (expect variability — sustained load thermally throttles that
   CPU). The first crest shoals, steepens, and breaks at x ≈ 9.5–10.5 m (t ≈ 15 s);
   at this pilot resolution it's a spilling/weakly-plunging crumble, not a clean
   plunging jet. 320 interface frames at even 0.05 s spacing →
-  `web-pipeline/frames-shoaling.json` (4.6 MB raw, ~14 KB/frame).
+  `web-pipeline/frames-shoaling.json` (4.4 MB raw, ~14 KB/frame). Pre-wave surface
+  noise ≤ ~0.7 mm rms (was ~4 mm before the two fixes below).
 - **Timing note**: with the 5 s ramp and 22 m of propagation, endTime 16 s captures
   exactly one breaking event, ending just as the bore reaches the end wall. For a
   multi-breaker loopable clip, set endTime ≈ 26–30 s (~2× the compute).
@@ -59,11 +60,20 @@ locally in Docker (OpenFOAM shoaling flume, same day).
   the shipped `laminar/waves/cnoidal` tutorial (x–z, same BCs and numerics) runs clean
   in the same image. The committed case is now correctly x–z with g = (0 0 −9.81).
   (The apt v1912 OSHA1stream function-object bug was real, but moot in Docker.)
-- **Stair-step initial condition on the slope**: `setFields` fills alpha cell-by-cell,
-  and on the sloped block the waterline crosses cell rows diagonally, so the run starts
-  with ~4 mm ripples trapped over the slope (visible at high vertical exaggeration,
-  ~5% of the incoming wave height). Fix for a production run: initialise with the
-  `setAlphaField` utility (exact fractional fill) instead.
+- **Surf-zone ripple noise — two stacked causes, both fixed** (A/B-verified in short
+  runs, then a full rerun):
+  1. *Stair-step initial condition*: `setFields` fills alpha cell-by-cell; on the
+     sloped block the waterline crosses cell rows diagonally, seeding ~2 mm rms
+     ripples from t = 0. Fixed: `setAlphaField` plane fill (exact sub-cell fractions;
+     needs `libs (waveModels);` in controlDict so utilities can parse the wave BCs).
+  2. *Spurious air jet along the interface*: interFoam's shared-velocity interface
+     cells let tiny pressure imbalances accelerate the 1000×-lighter air to ~3.5 m/s
+     in the first 1–2 cells above still water; that laminar "wind" continuously pumps
+     ripples onto the shallow surface (isoAdvector/interIsoFoam does NOT help — it's
+     momentum-side, not alpha-advection). Fixed: air `nu` raised 100× to 1.48e-3
+     (water untouched; air dynamics irrelevant here). Side effect: the air jet was
+     what limited the Courant number, so the fix also cut the 16 s run from 36 min to
+     8.1 min. Net: slope-region noise 0.17 mm rms at t = 2 s vs 2.9 mm before.
 - Parallel interFoam divergence does **not** crash: deltaT collapses to ~1e-50 and the
   run grinds at a fixed sim-time forever. Watchdogs should monitor deltaT, not just
   fatal errors (serial runs die properly with SIGFPE).

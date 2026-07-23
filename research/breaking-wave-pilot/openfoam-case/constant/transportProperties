@@ -27,7 +27,10 @@ water
 air
 {
     transportModel  Newtonian;
-    nu              1.48e-05;
+    // 100x physical air viscosity: suppresses the spurious shared-velocity air
+    // jet that forms along the interface and wind-ripples the shallow surface.
+    // Water is untouched; air dynamics are irrelevant to this clip.
+    nu              1.48e-03;
     rho             1;
 }
 

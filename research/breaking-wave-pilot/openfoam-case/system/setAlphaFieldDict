@@ -1,0 +1,14 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class dictionary;
+    object setAlphaFieldDict;
+}
+// exact fractional fill of the still-water surface at z = 0
+// (setFields' cell-granular fill leaves a stair-step on the sloped block
+//  that rings for the whole run)
+field   "alpha.water";
+type    plane;
+origin  (0 0 0);
+normal  (0 0 -1);
