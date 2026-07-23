@@ -46,7 +46,7 @@ def polylines_from_slice(sl):
         chains.append(chain)
     out = []
     for ch in chains:
-        xy = [(round(float(pts[i][0]), 4), round(float(pts[i][1]), 4)) for i in ch]
+        xy = [(round(float(pts[i][0]), 4), round(float(pts[i][2]), 4)) for i in ch]
         if len(xy) >= 2:
             out.append(xy)
     return out
@@ -65,7 +65,9 @@ def main():
     for t in times:
         reader.set_active_time_value(t)
         mesh = reader.read()['internalMesh']
-        sl = mesh.slice(normal='z', origin=(0, 0, 0.05))
+        # case is in the x-z plane (vertical z, per ESI waveModels convention);
+        # y is the 0.1 m slab direction, so slice its mid-plane
+        sl = mesh.slice(normal='y', origin=(0, 0.05, 0))
         try:
             iso = sl.contour([0.5], scalars='alpha.water')
         except Exception:
@@ -78,7 +80,7 @@ def main():
         'case': os.path.basename(os.path.abspath(case)),
         'wave': {'H': 0.128, 'T': 5.0, 'depth': 0.4, 'slope': '1:35',
                  'reference': 'Ting & Kirby (1994) plunging case parameters; ESI cnoidal generation'},
-        'solver': 'interFoam (OpenFOAM v1912), laminar, 2D, pilot resolution',
+        'solver': 'interFoam (OpenFOAM v2412, Docker), laminar, 2D, pilot resolution',
         'frames': frames,
     }
     with open(out_json, 'w') as f:

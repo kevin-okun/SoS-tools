@@ -1,0 +1,7 @@
+# run artifacts — regenerate with Allrun
+0/
+processor*/
+constant/polyMesh/
+log.*
+*.foam
+postProcessing/

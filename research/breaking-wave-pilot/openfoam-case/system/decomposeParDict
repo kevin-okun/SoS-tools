@@ -7,4 +7,4 @@ FoamFile
 }
 numberOfSubdomains 4;
 method          simple;
-coeffs { n (2 2 1); }
+coeffs { n (2 1 2); }

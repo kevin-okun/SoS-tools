@@ -41,10 +41,12 @@
   var scrub = document.getElementById('scrub'), tlab = document.getElementById('tlab');
 
   function bounds(){
-    var xs = [], ys = [];
-    DATA.frames.forEach(function(fr){ fr.lines.forEach(function(l){ l.forEach(function(p){ xs.push(p[0]); ys.push(p[1]); }); }); });
-    var mx = Math.min.apply(0, xs), Mx = Math.max.apply(0, xs);
-    var my = Math.min.apply(0, ys), My = Math.max.apply(0, ys);
+    // incremental min/max: Math.min.apply overflows the argument limit on big clips
+    var mx = Infinity, Mx = -Infinity, my = Infinity, My = -Infinity;
+    DATA.frames.forEach(function(fr){ fr.lines.forEach(function(l){ l.forEach(function(p){
+      if (p[0] < mx) mx = p[0]; if (p[0] > Mx) Mx = p[0];
+      if (p[1] < my) my = p[1]; if (p[1] > My) My = p[1];
+    }); }); });
     var padY = 0.15*(My-my);
     return {mx:mx, Mx:Mx, my:my-padY, My:My+padY};
   }
@@ -57,10 +59,11 @@
   function draw(){
     if (!DATA) return;
     var V = layout(), fr = DATA.frames[fi];
-    var sx = V.w/(B.Mx-B.mx), sy = V.h/(B.My-B.my), s = Math.min(sx, sy);
-    var ox = (V.w - s*(B.Mx-B.mx))/2, oy = (V.h + s*(B.My-B.my))/2;
-    function X(x){ return ox + (x-B.mx)*s; }
-    function Y(y){ return oy - (y-B.my)*s; }
+    // independent axis scales: long flumes get vertical exaggeration (shown in label)
+    var sx = V.w/(B.Mx-B.mx), sy = V.h/(B.My-B.my);
+    var ox = 0, oy = V.h;
+    function X(x){ return ox + (x-B.mx)*sx; }
+    function Y(y){ return oy - (y-B.my)*sy; }
     ctx.clearRect(0,0,V.w,V.h);
     ctx.strokeStyle = 'rgba(21,19,16,.15)'; ctx.setLineDash([4,4]); ctx.beginPath();
     ctx.moveTo(X(B.mx), Y(0)); ctx.lineTo(X(B.Mx), Y(0)); ctx.stroke(); ctx.setLineDash([]);
@@ -71,7 +74,8 @@
       for (var i = 1; i < l.length; i++) ctx.lineTo(X(l[i][0]), Y(l[i][1]));
       ctx.stroke();
     });
-    tlab.textContent = 't = '+fr.t.toFixed(3)+' T';
+    var ex = sy/sx;
+    tlab.textContent = 't = '+fr.t.toFixed(2)+' s · '+(ex >= 3 ? Math.round(ex) : ex.toFixed(1))+'× vert';
     scrub.value = fi;
   }
   function step(ms){
