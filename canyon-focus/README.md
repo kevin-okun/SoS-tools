@@ -36,7 +36,7 @@ the two oceans; the model's absolute heights are not meaningful by design.
 - **Land imagery:** Esri World Imagery (Esri, Maxar, Earthstar Geographics, and the GIS User
   Community).
 
-Companion article: [Why is Black's Beach bigger than surrounding breaks?](https://scienceofsurfing.com)
+Companion article: [Why is Black's Beach bigger than surrounding breaks?](https://scienceofsurfing.com/p/blacks-beach)
 
 ## License
 
