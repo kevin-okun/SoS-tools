@@ -26,7 +26,7 @@ the two oceans; the model's absolute heights are not meaningful by design.
 
 ## Data and references
 
-- **Seafloor:** USGS CoNED Southern California 1 m topobathymetric DEM (NOAA Digital Coast).
+- **Seafloor:** [USGS CoNED Southern California 1 m topobathymetric DEM](https://www.usgs.gov/data/topobathymetric-model-southern-coast-california-and-channel-islands-1930-2014).
 - **Wave model:** Celeris, a GPU-accelerated phase-resolving Boussinesq solver. Tavakkol, S. &
   Lynett, P. (2017), *Computer Physics Communications* 217: 117–127.
 - **Rays:** Munk, W. H. & Traylor, M. A. (1947), "Refraction of ocean waves: a process linking
@@ -36,7 +36,7 @@ the two oceans; the model's absolute heights are not meaningful by design.
 - **Land imagery:** Esri World Imagery (Esri, Maxar, Earthstar Geographics, and the GIS User
   Community).
 
-Companion article: [How much of Blacks is the canyon?](https://scienceofsurfing.com)
+Companion article: [Why is Black's Beach bigger than surrounding breaks?](https://scienceofsurfing.com)
 
 ## License
 
