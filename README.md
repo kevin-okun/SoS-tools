@@ -12,6 +12,7 @@ Live: **https://tools.scienceofsurfing.com/**
 | [Swell Window Explorer](swell-window/) | Which swell directions can actually reach a break, for ten Southern California spots | [open](https://tools.scienceofsurfing.com/swell-window/) |
 | [Swell Window Explorer — NY/NJ](swell-window-ny/) | Same, for seven New York and New Jersey breaks from Manasquan to Montauk | [open](https://tools.scienceofsurfing.com/swell-window-ny/) |
 | [Canyon Explorer — Scripps & La Jolla](canyon-focus/) | How much of Blacks is the canyon — every swell run over the real seafloor and again with the canyon erased | [open](https://tools.scienceofsurfing.com/canyon-focus/) |
+| [Rail Lab](rail-lab/) | How much rail shape matters: lift and drag on a rail cross-section as you change its apex, edge, thickness, and lean | [open](https://tools.scienceofsurfing.com/rail-lab/) |
 
 Each tool lives in its own folder with a `README.md` describing it and its data sources.
 

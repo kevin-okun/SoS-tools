@@ -27,6 +27,12 @@ For the Southern California tool, use the same block with
 `src=".../swell-window/"` and `id="sos-swell-window"`. One `<script>` handles any
 number of embedded tools on the page.
 
+## Rail Lab
+
+Same pattern, with `src=".../rail-lab/"`, `id="sos-rail-lab"`,
+`title="Rail Lab: how much does rail shape matter?"`, and a starting height of
+`1100px` (the resize script takes over from there).
+
 ## Notes
 
 - The iframe loads the hosted tool, so the Science of Surfing branding, footer credits,
